@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "@azure/msal-node": "^3.8.1",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.15.3",
+    "nodemon": "^3.1.11"
+  },
+  "type": "module",
+  "name": "server",
+  "version": "1.0.0",
+  "description": "| Method | Endpoint                   | Description                         |\r | ------ | -------------------------- | ----------------------------------- |\r | GET    | `/auth/login`              | Initiate Microsoft login            |\r | GET    | `/auth/microsoft/callback` | Microsoft OAuth callback handler    |\r | GET    | `/auth/me`                 | Get current authenticated user info |\r | POST   | `/auth/logout`             | Logout current user                 |",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

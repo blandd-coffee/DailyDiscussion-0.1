@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      :root {
+        --bs-body-bg: #020617;
+      }
+
+      body {
+        min-height: 100vh;
+        color: #e5e7eb;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .bg-sprites {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .bg-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background: radial-gradient(
+            1200px 600px at 10% -10%,
+            rgba(37, 99, 235, 0.3),
+            transparent 70%
+          ),
+          radial-gradient(
+            1400px 700px at 110% 0%,
+            rgba(8, 47, 73, 0.6),
+            transparent 70%
+          ),
+          linear-gradient(180deg, rgba(15, 23, 42, 0.95), #020617);
+      }
+
+      /* BIRDS */
+
+      .bird {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        image-rendering: pixelated;
+        opacity: 0.25;
+        filter: hue-rotate(210deg) brightness(1.3) saturate(0.9);
+        transform-origin: center center;
+        will-change: transform;
+      }
+
+      /* Glass cards */
+
+      .glass {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(14px);
+        border-radius: 1rem;
+      }
+
+      .placeholder-minh {
+        min-height: 3.25rem;
+      }
+
+      .table-light-glass {
+        --bs-table-bg: rgba(15, 23, 42, 0.9);
+        --bs-table-border-color: rgba(31, 41, 55, 0.9);
+        color: #e5e7eb;
+      }
+
+      .table-light-glass thead {
+        background-color: rgba(17, 24, 39, 0.95);
+      }
+
+      .table-light-glass tbody tr:hover {
+        background-color: rgba(31, 41, 55, 0.9);
+      }
+
+      .small-muted {
+        color: rgba(148, 163, 184, 1);
+      }
+
+      .section-title {
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(156, 163, 175, 1);
+        margin-bottom: 0.35rem;
+      }
+
+      .week-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.85rem;
+        border-radius: 0.9rem;
+        transition: background-color 0.12s ease, transform 0.08s ease;
+      }
+
+      .week-row:hover {
+        background-color: rgba(30, 64, 175, 0.25);
+        transform: translateY(-1px);
+      }
+
+      .week-day-label {
+        font-weight: 600;
+        color: #e5e7eb;
+      }
+
+      .week-date-label {
+        font-size: 0.75rem;
+        color: #9ca3af;
+      }
+
+      .week-no-discussion {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-style: italic;
+      }
+
+      .week-disc-btn {
+        border-radius: 999px;
+        padding: 0.2rem 0.85rem;
+        font-size: 0.8rem;
+      }
+
+      .unsched-item {
+        border-radius: 0.85rem;
+        margin-bottom: 0.35rem;
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        color: #e5e7eb !important;
+      }
+
+      .unsched-item:hover {
+        background-color: rgba(30, 64, 175, 0.28) !important;
+      }
+
+      /* manual tab system */
+      .admin-section {
+        display: none;
+      }
+
+      .admin-section.active {
+        display: block;
+      }
+
+      /* navbar */
+
+      .navbar-admin {
+        background: linear-gradient(90deg, #020617, #0f172a);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(16px);
+      }
+
+      .navbar-admin .navbar-brand {
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      .navbar-admin .nav-link {
+        color: rgba(209, 213, 219, 0.9);
+      }
+
+      .navbar-admin .nav-link.active {
+        color: #e5e7eb;
+        font-weight: 600;
+        border-bottom: 2px solid #38bdf8;
+        border-radius: 0;
+      }
+
+      .badge-soft {
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.6);
+        color: #7dd3fc;
+        font-weight: 500;
+      }
+
+      .card-header {
+        background-color: rgba(15, 23, 42, 0.96);
+        border-bottom: 1px solid rgba(31, 41, 55, 0.95);
+      }
+
+      .btn-outline-light {
+        color: #e5e7eb;
+        border-color: rgba(148, 163, 184, 0.9);
+      }
+
+      .btn-outline-light:hover {
+        background-color: rgba(148, 163, 184, 0.3);
+        color: #f9fafb;
+      }
+
+      .btn-primary {
+        background-color: #2563eb;
+        border-color: #2563eb;
+      }
+
+      .btn-primary:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+      }
+
+      .btn-secondary {
+        background-color: #4b5563;
+        border-color: #4b5563;
+      }
+
+      .btn-secondary:hover {
+        background-color: #374151;
+        border-color: #374151;
+      }
+
+      .toast-body {
+        color: #e5e7eb;
+      }
+
+      .toast.text-bg-light {
+        background-color: rgba(15, 23, 42, 0.96) !important;
+        border: 1px solid rgba(55, 65, 81, 0.9) !important;
+      }
+
+      .modal-content {
+        background-color: rgba(15, 23, 42, 0.98);
+        color: #e5e7eb;
+      }
+
+      .modal-header,
+      .modal-footer {
+        border-color: rgba(31, 41, 55, 0.9);
+      }
+
+      .list-group-item {
+        border-color: rgba(31, 41, 55, 0.75);
+      }
+
+      code {
+        color: #7dd3fc;
+      }
+
+      /* FORM THEME: unify all forms with the Discussions tab look */
+
+      .form-label,
+      .form-check-label {
+        color: #e5e7eb;
+        font-size: 0.875rem;
+      }
+
+      .form-text {
+        color: rgba(148, 163, 184, 0.9) !important;
+      }
+
+      .form-control,
+      .form-select,
+      .form-control:focus,
+      .form-select:focus,
+      textarea.form-control {
+        background-color: rgba(15, 23, 42, 0.96);
+        color: #e5e7eb;
+        border-color: rgba(55, 65, 81, 0.9);
+        box-shadow: none;
+      }
+
+      .form-control:focus,
+      .form-select:focus,
+      textarea.form-control:focus {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 0.15rem rgba(56, 189, 248, 0.25);
+      }
+
+      .form-control::placeholder,
+      textarea.form-control::placeholder {
+        color: rgba(148, 163, 184, 0.8);
+      }
+
+      .form-control:disabled,
+      .form-control[readonly],
+      .form-select:disabled {
+        background-color: rgba(15, 23, 42, 0.6);
+        color: rgba(156, 163, 175, 0.9);
+        border-color: rgba(55, 65, 81, 0.7);
+      }
+
+      .form-check-input {
+        background-color: rgba(15, 23, 42, 0.96);
+        border-color: rgba(55, 65, 81, 0.9);
+      }
+
+      .form-check-input:checked {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.15rem rgba(56, 189, 248, 0.3);
+      }
+
+      .input-group-text {
+        background-color: rgba(15, 23, 42, 0.96);
+        color: #9ca3af;
+        border-color: rgba(55, 65, 81, 0.9);
+      }
+
+      /* Slight layout refinement for headers with filters */
+      .card-header .filters-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .card-header .filters-inline .form-control-sm {
+        min-width: 180px;
+      }
+
+      @media (max-width: 576px) {
+        .card-header .filters-inline {
+          justify-content: stretch;
+        }
+        .card-header .filters-inline .form-control-sm {
+          flex: 1 1 auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Floating bird background -->
+    <div class="bg-sprites" id="bgSprites"></div>
+    <div class="bg-overlay"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-admin">
+      <div class="container">
+        <a class="navbar-brand" href="#">Admin</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav"
+          aria-controls="nav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-section="usersTab">Users</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="#" data-section="discussionsTab"
+                >Discussions</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-section="responsesTab"
+                >Responses</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <!-- USERS SECTION -->
+      <section class="admin-section" id="usersTab">
+        <div class="card glass">
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+            <span class="fw-semibold">Users</span>
+            <div class="filters-inline">
+              <input
+                id="userSearch"
+                class="form-control form-control-sm"
+                placeholder="Search users… (CMP_ stripped)"
+              />
+              <button id="reloadUsers" class="btn btn-outline-light btn-sm">
+                Reload
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table
+                class="table table-light-glass table-sm align-middle"
+                id="usersTable"
+              >
+                <thead class="align-middle">
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">MSAL ID</th>
+                    <th scope="col">Disabled</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTbody">
+                  <tr class="placeholder-glow">
+                    <td colspan="6" class="placeholder-minh">
+                      <span class="placeholder col-12"></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DISCUSSIONS SECTION (default active) -->
+      <section class="admin-section active" id="discussionsTab">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card glass h-100">
+              <div
+                class="card-header d-flex justify-content-between align-items-center"
+              >
+                <span class="fw-semibold">Week Schedule</span>
+                <button
+                  id="reloadDiscussions"
+                  class="btn btn-outline-light btn-sm"
+                >
+                  Reload
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="section-title">This week (Monday–Friday)</div>
+                <div id="weekList" class="vstack gap-1"></div>
+                <hr class="my-3" />
+                <div>
+                  <div class="section-title">Unscheduled</div>
+                  <div
+                    id="unscheduledList"
+                    class="list-group list-group-flush"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current / Selected + Editor -->
+          <div class="col-lg-5">
+            <div class="card glass mb-3">
+              <div
+                class="card-header fw-semibold d-flex justify-content-between align-items-center"
+              >
+                <span>Selected Discussion</span>
+                <span
+                  id="currentDiscDate"
+                  class="badge badge-soft d-none"
+                ></span>
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <div class="small-muted">Title</div>
+                  <div id="currentDiscTitle" class="fw-semibold">—</div>
+                </div>
+                <div>
+                  <div class="small-muted">Content</div>
+                  <div id="currentDiscContent" style="white-space: pre-wrap">
+                    —
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card glass">
+              <div class="card-header fw-semibold">
+                Create / Update Discussion
+              </div>
+              <div class="card-body">
+                <form id="discussionForm" class="vstack gap-3">
+                  <input type="hidden" id="discussionId" />
+                  <div>
+                    <label class="form-label" for="discTitle">Title</label>
+                    <input
+                      id="discTitle"
+                      class="form-control"
+                      placeholder="Title"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-label" for="discContent">Content</label>
+                    <textarea
+                      id="discContent"
+                      class="form-control"
+                      rows="5"
+                      placeholder="Content"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label class="form-label" for="discDate"
+                      >Active date (optional)</label
+                    >
+                    <input type="date" id="discDate" class="form-control" />
+                    <div class="form-text">
+                      Maps to <code>active_date</code>. Leave empty for
+                      unscheduled.
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end gap-2">
+                    <button
+                      id="newDiscussionBtn"
+                      class="btn btn-secondary btn-sm"
+                      type="button"
+                    >
+                      New discussion
+                    </button>
+                    <button
+                      id="saveDiscussion"
+                      class="btn btn-primary btn-sm"
+                      type="submit"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESPONSES SECTION -->
+      <section class="admin-section" id="responsesTab">
+        <div class="card glass">
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+            <span class="fw-semibold">Responses</span>
+            <div class="filters-inline">
+              <input
+                id="respDiscussionId"
+                class="form-control form-control-sm"
+                placeholder="Filter by discussion id"
+              />
+              <input
+                id="respUserSearch"
+                class="form-control form-control-sm"
+                placeholder="Filter by username (CMP_ stripped)"
+              />
+              <button id="reloadResponses" class="btn btn-outline-light btn-sm">
+                Reload
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table
+                class="table table-light-glass table-sm align-middle"
+                id="responsesTable"
+              >
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Discussion</th>
+                    <th>Parent</th>
+                    <th>Created</th>
+                    <th>Content</th>
+                  </tr>
+                </thead>
+                <tbody id="responsesTbody">
+                  <tr class="placeholder-glow">
+                    <td colspan="6" class="placeholder-minh">
+                      <span class="placeholder col-12"></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Shared Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+      <div
+        id="toast"
+        class="toast align-items-center text-bg-light border-0"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="toastBody">Error</div>
+          <button
+            type="button"
+            class="btn-close me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- User modal: details + disable/enable -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-secondary">
+          <div class="modal-header">
+            <h5 class="modal-title">User</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="userModalBody">Loading…</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="toggleUserBtn">
+              Disable
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // Floating birds: physics-style movement with collisions + rotation + mouse repulsion
+      (function initBirds() {
+        const container = document.getElementById("bgSprites");
+        if (!container) return;
+
+        const NUM_BIRDS = 24;
+        const SPRITE_SIZE = 90;
+        const HALF = SPRITE_SIZE / 2;
+        const spriteSrc = "bird.png"; // make sure this matches your actual file
+
+        const birds = [];
+
+        const mouse = {
+          x: 0,
+          y: 0,
+          active: false,
+        };
+
+        window.addEventListener("mousemove", (e) => {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+          mouse.active = true;
+        });
+
+        window.addEventListener("mouseleave", () => {
+          mouse.active = false;
+        });
+
+        function rand(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+
+        function createBird() {
+          const img = document.createElement("img");
+          img.src = spriteSrc;
+          img.alt = "bird";
+          img.className = "bird";
+          container.appendChild(img);
+
+          const W = window.innerWidth;
+          const H = window.innerHeight;
+
+          const x = rand(HALF, W - HALF);
+          const y = rand(HALF, H - HALF);
+
+          const speed = rand(30, 70);
+          const angle = rand(0, Math.PI * 2);
+          const vx = Math.cos(angle) * speed;
+          const vy = Math.sin(angle) * speed;
+
+          birds.push({ x, y, vx, vy, el: img });
+        }
+
+        for (let i = 0; i < NUM_BIRDS; i++) {
+          createBird();
+        }
+
+        let lastTime = performance.now();
+
+        function step(now) {
+          const dt = (now - lastTime) / 1000;
+          lastTime = now;
+
+          const W = window.innerWidth;
+          const H = window.innerHeight;
+
+          const minX = -HALF;
+          const maxX = W + HALF;
+          const minY = -HALF;
+          const maxY = H + HALF;
+
+          // Move + walls
+          for (const b of birds) {
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+
+            if (b.x < minX) {
+              b.x = minX;
+              b.vx *= -1;
+            } else if (b.x > maxX) {
+              b.x = maxX;
+              b.vx *= -1;
+            }
+
+            if (b.y < minY) {
+              b.y = minY;
+              b.vy *= -1;
+            } else if (b.y > maxY) {
+              b.y = maxY;
+              b.vy *= -1;
+            }
+          }
+
+          // Mouse repulsion
+          if (mouse.active) {
+            const R = 150;
+            const baseForce = 220;
+
+            for (const b of birds) {
+              const dx = b.x - mouse.x;
+              const dy = b.y - mouse.y;
+              const dist = Math.hypot(dx, dy);
+
+              if (dist > 0 && dist < R) {
+                const strength = (R - dist) / R;
+                const nx = dx / dist;
+                const ny = dy / dist;
+                const force = baseForce * strength;
+
+                b.vx += nx * force * dt;
+                b.vy += ny * force * dt;
+              }
+            }
+          }
+
+          // Bird-bird collisions
+          const minDist = SPRITE_SIZE * 0.8;
+          for (let i = 0; i < birds.length; i++) {
+            for (let j = i + 1; j < birds.length; j++) {
+              const a = birds[i];
+              const c = birds[j];
+              const dx = c.x - a.x;
+              const dy = c.y - a.y;
+              const dist = Math.hypot(dx, dy);
+
+              if (dist > 0 && dist < minDist) {
+                const overlap = (minDist - dist) / 2;
+                const nx = dx / dist;
+                const ny = dy / dist;
+
+                a.x -= nx * overlap;
+                a.y -= ny * overlap;
+                c.x += nx * overlap;
+                c.y += ny * overlap;
+
+                const tmpVx = a.vx;
+                const tmpVy = a.vy;
+                a.vx = c.vx;
+                a.vy = c.vy;
+                c.vx = tmpVx;
+                c.vy = tmpVy;
+              }
+            }
+          }
+
+          // Clamp max speed
+          const MAX_SPEED = 140;
+          for (const b of birds) {
+            const sp = Math.hypot(b.vx, b.vy);
+            if (sp > MAX_SPEED) {
+              const scale = MAX_SPEED / sp;
+              b.vx *= scale;
+              b.vy *= scale;
+            }
+          }
+
+          // Render
+          for (const b of birds) {
+            const angle = Math.atan2(b.vy, b.vx);
+            b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${angle}rad)`;
+          }
+
+          requestAnimationFrame(step);
+        }
+
+        requestAnimationFrame(step);
+
+        window.addEventListener("resize", () => {
+          const W = window.innerWidth;
+          const H = window.innerHeight;
+          const minX = HALF;
+          const maxX = W - HALF;
+          const minY = HALF;
+          const maxY = H - HALF;
+
+          for (const b of birds) {
+            b.x = Math.min(maxX, Math.max(minX, b.x));
+            b.y = Math.min(maxY, Math.max(minY, b.y));
+          }
+        });
+      })();
+
+      // Toast
+      const toastEl = document.getElementById("toast");
+      const toastBody = document.getElementById("toastBody");
+      const showError = (msg) => {
+        toastBody.textContent = msg || "Unexpected error";
+        bootstrap.Toast.getOrCreateInstance(toastEl).show();
+      };
+
+      const json = (r) => r.json();
+      async function apiGet(url) {
+        const r = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!r.ok) {
+          showError(`${url} → HTTP ${r.status}`);
+          throw new Error(r.statusText);
+        }
+        return json(r);
+      }
+      async function apiPost(url, body) {
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body || {}),
+        });
+        if (!r.ok) {
+          showError(`${url} → HTTP ${r.status}`);
+          throw new Error(r.statusText);
+        }
+        return r.json().catch(() => ({}));
+      }
+      async function apiPut(url, body) {
+        const r = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body || {}),
+        });
+        if (!r.ok) {
+          showError(`${url} → HTTP ${r.status}`);
+          throw new Error(r.statusText);
+        }
+        return r.json().catch(() => ({}));
+      }
+
+      // Helpers
+      const stripCMP = (s) => (s || "").replace(/^CMP_/i, "").trim();
+      const displayName = (u) =>
+        stripCMP(u?.username) ||
+        (u?.email ? u.email.split("@")[0] : "") ||
+        (u?.msal_id ? `user:${u.msal_id}` : `User ${u?.user_id ?? ""}`);
+
+      const toDateInputValue = (val) => {
+        if (!val) return "";
+        const d = new Date(val);
+        if (!Number.isNaN(d.getTime())) {
+          return d.toISOString().slice(0, 10);
+        }
+        return String(val).slice(0, 10);
+      };
+
+      const parseDate = (val) => {
+        if (!val) return null;
+        const d = new Date(val);
+        if (!Number.isNaN(d.getTime())) return d;
+        const s = String(val).slice(0, 10);
+        const parts = s.split("-");
+        if (parts.length === 3) {
+          const dd = new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+          );
+          return Number.isNaN(dd.getTime()) ? null : dd;
+        }
+        return null;
+      };
+
+      const dateKey = (d) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(d.getDate()).padStart(2, "0")}`;
+
+      const weekDayName = (idx) =>
+        [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ][idx];
+
+      const formatBadge = (val) => {
+        if (!val) return "";
+        const d = parseDate(val);
+        if (!d) return String(val).slice(0, 10);
+        const wd = weekDayName(d.getDay()).slice(0, 3);
+        return `${dateKey(d)} • ${wd}`;
+      };
+
+      // Manual tab switching
+      const navLinks = document.querySelectorAll("a.nav-link[data-section]");
+      const sections = document.querySelectorAll(".admin-section");
+
+      function showSection(id) {
+        sections.forEach((sec) => {
+          sec.classList.toggle("active", sec.id === id);
+        });
+      }
+
+      navLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const target = link.getAttribute("data-section");
+          navLinks.forEach((l) => l.classList.remove("active"));
+          link.classList.add("active");
+          showSection(target);
+        });
+      });
+
+      window.adminShowSection = showSection;
+
+      // USERS
+      const usersTbody = document.getElementById("usersTbody");
+      const userSearch = document.getElementById("userSearch");
+      const userModal = new bootstrap.Modal(
+        document.getElementById("userModal")
+      );
+      const userModalBody = document.getElementById("userModalBody");
+      const toggleUserBtn = document.getElementById("toggleUserBtn");
+      let usersCache = [];
+      let modalUser = null;
+
+      function td(text) {
+        const x = document.createElement("td");
+        x.textContent = text == null ? "" : String(text);
+        return x;
+      }
+      function btnSmall(label, cls) {
+        const b = document.createElement("button");
+        b.className = `btn btn-sm ${cls}`;
+        b.textContent = label;
+        return b;
+      }
+
+      function renderUsers(list) {
+        usersTbody.textContent = "";
+        if (!list.length) {
+          const tr = document.createElement("tr");
+          const td0 = document.createElement("td");
+          td0.colSpan = 6;
+          td0.className = "text-secondary";
+          td0.textContent = "No users";
+          tr.append(td0);
+          usersTbody.append(tr);
+          return;
+        }
+        for (const u of list) {
+          const tr = document.createElement("tr");
+          tr.append(
+            td(u.user_id),
+            td(displayName(u)),
+            td(u.email || ""),
+            td(u.msal_id || ""),
+            td(u.disabled ? "Yes" : "No")
+          );
+          const act = document.createElement("td");
+          act.className = "text-end";
+          const viewBtn = btnSmall("View", "btn-outline-light");
+          viewBtn.addEventListener("click", () => openUserModal(u.user_id));
+          act.append(viewBtn);
+          tr.append(act);
+          usersTbody.append(tr);
+        }
+      }
+
+      async function loadUsers(query) {
+        usersTbody.innerHTML =
+          '<tr class="placeholder-glow"><td colspan="6" class="placeholder-minh"><span class="placeholder col-12"></span></td></tr>';
+        try {
+          const list = query
+            ? await apiGet(
+                `/api/users/search?name=${encodeURIComponent(stripCMP(query))}`
+              )
+            : await apiGet("/api/users/all");
+          usersCache = Array.isArray(list) ? list : [];
+          renderUsers(usersCache);
+        } catch {}
+      }
+
+      async function openUserModal(id) {
+        try {
+          userModalBody.textContent = "Loading…";
+          modalUser = await apiGet(`/api/users/${encodeURIComponent(id)}`);
+          const u = modalUser || {};
+          userModalBody.innerHTML = `
+            <div class="vstack gap-1">
+              <div><span class="small-muted">ID</span><div>${
+                u.user_id ?? ""
+              }</div></div>
+              <div><span class="small-muted">Username</span><div>${
+                stripCMP(u.username) || ""
+              }</div></div>
+              <div><span class="small-muted">Email</span><div>${
+                u.email ?? ""
+              }</div></div>
+              <div><span class="small-muted">MSAL ID</span><div>${
+                u.msal_id ?? ""
+              }</div></div>
+              <div><span class="small-muted">Disabled</span><div>${
+                u.disabled ? "Yes" : "No"
+              }</div></div>
+            </div>`;
+          toggleUserBtn.textContent = u.disabled
+            ? "Enable user"
+            : "Disable user";
+          userModal.show();
+        } catch {}
+      }
+
+      toggleUserBtn.addEventListener("click", async () => {
+        if (!modalUser) return;
+        try {
+          await apiPut("/api/users/", {
+            user_id: modalUser.user_id,
+            disabled: !modalUser.disabled,
+          });
+          userModal.hide();
+          await loadUsers(userSearch.value.trim());
+        } catch {}
+      });
+
+      userSearch.addEventListener("input", (e) => {
+        const q = stripCMP(e.target.value.trim());
+        if (!q) {
+          renderUsers(usersCache);
+          return;
+        }
+        const lower = q.toLowerCase();
+        const filtered = usersCache.filter(
+          (u) =>
+            stripCMP(u.username || "")
+              .toLowerCase()
+              .includes(lower) || (u.email || "").toLowerCase().includes(lower)
+        );
+        renderUsers(filtered);
+      });
+      document
+        .getElementById("reloadUsers")
+        .addEventListener("click", () => loadUsers(userSearch.value.trim()));
+
+      // DISCUSSIONS
+      const weekList = document.getElementById("weekList");
+      const unscheduledList = document.getElementById("unscheduledList");
+      const discId = document.getElementById("discussionId");
+      const discTitle = document.getElementById("discTitle");
+      const discContent = document.getElementById("discContent");
+      const discDate = document.getElementById("discDate");
+      const currentDiscTitle = document.getElementById("currentDiscTitle");
+      const currentDiscContent = document.getElementById("currentDiscContent");
+      const currentDiscDate = document.getElementById("currentDiscDate");
+      const respDiscussionId = document.getElementById("respDiscussionId");
+      const newDiscussionBtn = document.getElementById("newDiscussionBtn");
+
+      function weekPlaceholder() {
+        weekList.innerHTML =
+          '<div class="placeholder-glow"><div class="placeholder col-12 placeholder-minh"></div></div>';
+        unscheduledList.innerHTML =
+          '<div class="placeholder-glow"><div class="placeholder col-12 placeholder-minh"></div></div>';
+      }
+
+      function selectDiscussion(d) {
+        const id = d.discussion_id ?? null;
+        discId.value = id != null ? String(id) : "";
+        discTitle.value = d.title || "";
+        discContent.value = d.content || "";
+        discDate.value = toDateInputValue(d.active_date || "");
+
+        currentDiscTitle.textContent = d.title || "Untitled";
+        currentDiscContent.textContent = d.content || "";
+
+        if (d.active_date) {
+          currentDiscDate.textContent = formatBadge(d.active_date);
+          currentDiscDate.classList.remove("d-none");
+        } else {
+          currentDiscDate.textContent = "";
+          currentDiscDate.classList.add("d-none");
+        }
+
+        if (id != null) {
+          respDiscussionId.value = String(id);
+          loadResponses();
+        }
+      }
+
+      function renderWeek(days, byDate) {
+        weekList.textContent = "";
+        for (const dayInfo of days) {
+          const row = document.createElement("div");
+          row.className = "week-row";
+
+          const left = document.createElement("div");
+          left.className = "d-flex flex-column";
+          const nameEl = document.createElement("span");
+          nameEl.className = "week-day-label";
+          nameEl.textContent = dayInfo.label;
+          const dateEl = document.createElement("span");
+          dateEl.className = "week-date-label";
+          dateEl.textContent = dateKey(dayInfo.date);
+          left.append(nameEl, dateEl);
+
+          const right = document.createElement("div");
+          right.className = "ms-2";
+
+          const key = dateKey(dayInfo.date);
+          const list = byDate.get(key) || [];
+
+          if (list.length === 0) {
+            const noEl = document.createElement("span");
+            noEl.className = "week-no-discussion";
+            noEl.textContent = "No discussion";
+            right.append(noEl);
+          } else {
+            for (const d of list) {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className =
+                "btn btn-sm btn-outline-primary week-disc-btn me-2 mb-1";
+              btn.textContent = d.title || `Discussion ${d.discussion_id}`;
+              btn.addEventListener("click", () => selectDiscussion(d));
+              right.append(btn);
+            }
+          }
+
+          row.append(left, right);
+          weekList.append(row);
+        }
+      }
+
+      function renderUnscheduled(list) {
+        unscheduledList.textContent = "";
+        if (!list.length) {
+          const msg = document.createElement("div");
+          msg.className = "small text-secondary fst-italic";
+          msg.textContent = "No unscheduled discussions.";
+          unscheduledList.append(msg);
+          return;
+        }
+        for (const d of list) {
+          const a = document.createElement("a");
+          a.href = "#";
+          a.className =
+            "list-group-item unsched-item list-group-item-action px-2 py-2";
+          const t = document.createElement("div");
+          t.className = "fw-semibold text-truncate";
+          t.textContent = d.title || "Untitled";
+          const meta = document.createElement("div");
+          meta.className = "small text-secondary";
+          meta.textContent = `ID: ${d.discussion_id ?? "?"}`;
+          a.append(t, meta);
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            selectDiscussion(d);
+          });
+          unscheduledList.append(a);
+        }
+      }
+
+      async function loadDiscussions() {
+        weekPlaceholder();
+        try {
+          const [scheduled, unscheduled] = await Promise.all([
+            apiGet("/api/discussions/all"),
+            apiGet("/api/discussions/unscheduled"),
+          ]);
+
+          const schedArr = Array.isArray(scheduled) ? scheduled : [];
+          const unschedArr = Array.isArray(unscheduled) ? unscheduled : [];
+
+          const byDate = new Map();
+          for (const d of schedArr) {
+            const dt = parseDate(d.active_date);
+            if (!dt) continue;
+            const key = dateKey(dt);
+            if (!byDate.has(key)) byDate.set(key, []);
+            byDate.get(key).push(d);
+          }
+
+          const today = new Date();
+          const day = today.getDay();
+          const offsetToMonday = (day + 6) % 7;
+          const monday = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate() - offsetToMonday
+          );
+          const days = [];
+          for (let i = 0; i < 5; i++) {
+            const d = new Date(
+              monday.getFullYear(),
+              monday.getMonth(),
+              monday.getDate() + i
+            );
+            days.push({ label: weekDayName(d.getDay()), date: d });
+          }
+
+          renderWeek(days, byDate);
+          renderUnscheduled(unschedArr);
+
+          let defaultDisc = null;
+          const todayKey = dateKey(today);
+          const todayList = byDate.get(todayKey) || [];
+          if (todayList.length > 0) {
+            defaultDisc = todayList[0];
+          } else {
+            outer: for (const d of days) {
+              const list = byDate.get(dateKey(d.date)) || [];
+              if (list.length > 0) {
+                defaultDisc = list[0];
+                break outer;
+              }
+            }
+            if (!defaultDisc && unschedArr.length > 0) {
+              defaultDisc = unschedArr[0];
+            }
+          }
+
+          if (defaultDisc) {
+            selectDiscussion(defaultDisc);
+          } else {
+            currentDiscTitle.textContent = "—";
+            currentDiscContent.textContent = "—";
+            currentDiscDate.textContent = "";
+            currentDiscDate.classList.add("d-none");
+          }
+        } catch {}
+      }
+
+      function startNewDiscussionDraft() {
+        discId.value = "";
+        discTitle.value = "";
+        discContent.value = "";
+        discDate.value = "";
+      }
+      newDiscussionBtn.addEventListener("click", startNewDiscussionDraft);
+
+      document
+        .getElementById("discussionForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const idVal = discId.value ? Number(discId.value) : null;
+
+          const payload = {
+            title: discTitle.value.trim(),
+            content: discContent.value.trim(),
+          };
+
+          if (!payload.title) {
+            showError("Title is required.");
+            return;
+          }
+          if (!payload.content) {
+            showError("Content is required.");
+            return;
+          }
+
+          if (idVal !== null && !Number.isNaN(idVal)) {
+            payload.id = idVal;
+          }
+
+          const dateVal = discDate.value.trim();
+          if (dateVal) {
+            payload.active = dateVal;
+          } else if (idVal !== null && !Number.isNaN(idVal)) {
+            payload.active = null;
+          }
+
+          try {
+            if (idVal !== null && !Number.isNaN(idVal)) {
+              await apiPut("/api/discussions", payload);
+            } else {
+              await apiPost("/api/discussions", payload);
+            }
+            await loadDiscussions();
+          } catch {}
+        });
+
+      document
+        .getElementById("reloadDiscussions")
+        .addEventListener("click", loadDiscussions);
+
+      // RESPONSES viewer
+      const responsesTbody = document.getElementById("responsesTbody");
+      const respUserSearch = document.getElementById("respUserSearch");
+      let responsesCache = [];
+      let usersMap = new Map();
+
+      async function refreshUsersMap() {
+        try {
+          if (!usersCache.length) {
+            const users = await apiGet("/api/users/all");
+            usersMap = new Map((users || []).map((u) => [u.user_id, u]));
+          } else {
+            usersMap = new Map(usersCache.map((u) => [u.user_id, u]));
+          }
+        } catch {
+          usersMap = new Map();
+        }
+      }
+
+      function tdTruncated(text) {
+        const raw = text || "";
+        const truncated = raw.length > 160 ? raw.slice(0, 157) + "…" : raw;
+        const x = document.createElement("td");
+        x.textContent = truncated;
+        return x;
+      }
+
+      function renderResponses(list) {
+        responsesTbody.textContent = "";
+        if (!list.length) {
+          const tr = document.createElement("tr");
+          const td0 = document.createElement("td");
+          td0.colSpan = 6;
+          td0.className = "text-secondary";
+          td0.textContent = "No responses";
+          tr.append(td0);
+          responsesTbody.append(tr);
+          return;
+        }
+        list.sort(
+          (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+        );
+        for (const r of list) {
+          const u = usersMap.get(r.author_id) || {};
+          const tr = document.createElement("tr");
+          tr.append(
+            td(r.response_id ?? r.id),
+            td(displayName(u)),
+            td(r.discussion_id),
+            td(r.parent_response_id ?? ""),
+            td(r.created_at || ""),
+            tdTruncated(r.content || "")
+          );
+          responsesTbody.append(tr);
+        }
+      }
+
+      function applyResponseFilters() {
+        const rawId = respDiscussionId.value.trim();
+        const did = rawId ? Number(rawId) : NaN;
+        const nameQ = stripCMP(respUserSearch.value || "").toLowerCase();
+
+        let list = responsesCache;
+
+        if (!Number.isNaN(did)) {
+          list = list.filter((r) => Number(r.discussion_id) === did);
+        }
+
+        if (nameQ) {
+          list = list.filter((r) => {
+            const u = usersMap.get(r.author_id) || {};
+            const n = displayName(u).toLowerCase();
+            return n.includes(nameQ);
+          });
+        }
+
+        renderResponses(list);
+      }
+
+      async function loadResponses() {
+        responsesTbody.innerHTML =
+          '<tr class="placeholder-glow"><td colspan="6" class="placeholder-minh"><span class="placeholder col-12"></span></td></tr>';
+        try {
+          const [all] = await Promise.all([
+            apiGet("/api/responses"),
+            refreshUsersMap(),
+          ]);
+          responsesCache = Array.isArray(all) ? all : [];
+          applyResponseFilters();
+        } catch {}
+      }
+
+      document
+        .getElementById("reloadResponses")
+        .addEventListener("click", loadResponses);
+      respDiscussionId.addEventListener("input", applyResponseFilters);
+      respUserSearch.addEventListener("input", applyResponseFilters);
+
+      (async function init() {
+        await loadUsers();
+        await loadDiscussions();
+        await loadResponses();
+      })();
+    </script>
+  </body>
+</html>

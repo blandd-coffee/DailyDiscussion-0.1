@@ -1,0 +1,25 @@
+POST http://localhost:8080/api/discussions HTTP/1.1
+Content-Type: application/json
+
+{
+    "title": "test4",
+    "content": "tesssst",
+    "active": null
+}
+
+###
+GET http://localhost:8080/api/discussions HTTP/1.1
+###'
+GET http://localhost:3000/api/discussions/unscheduled
+Content-Type: application/json
+###
+GET http://localhost:8080/api/discussions/1
+###
+PUT http://localhost:3000/api/discussions HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 7,
+    "title": "Test update",
+    "active": "2025-11-11"
+}
