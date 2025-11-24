@@ -1,10 +1,6 @@
 import db from "../config/db.js";
 
-/**
- * Gets a single user by ID
- * @param {number} id
- * @returns
- */
+/** Gets a single user by ID */
 const getUsersByID = async (req, res) => {
   try {
     const { id } = req.params;

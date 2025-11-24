@@ -1,5 +1,6 @@
 import db from "../config/db.js";
 
+/** Retrieves responses for today's scheduled discussion */
 const getResponses = async (req, res) => {
   try {
     const [discussion] = await db.query(
@@ -16,9 +17,10 @@ const getResponses = async (req, res) => {
     );
     if (responses.length === 0)
       return res.status(404).json({ error: "No responses found" });
+    logger.info("Responses fetched successfully");
     res.json(responses);
   } catch (error) {
-    console.error("Error fetching responses", error);
+    logger.error("Error fetching responses", error);
     res.status(500).json({ error: "Database error" });
   }
 };

@@ -2,8 +2,11 @@ import { ConfidentialClientApplication } from "@azure/msal-node";
 import { msalConfig, authParams } from "../config/authConfig.js";
 import axios from "axios";
 import { userExists } from "../utility/userExists.js";
+import logger from "../utility/logger.js";
 
 const cca = new ConfidentialClientApplication(msalConfig);
+
+/** Handles Microsoft OAuth login flow redirection */
 const login = async (req, res, next) => {
   try {
     const url = await cca.getAuthCodeUrl({
@@ -14,10 +17,17 @@ const login = async (req, res, next) => {
     });
     res.redirect(url);
   } catch (e) {
+    logger.error("Login failed:", e);
     next(e);
   }
 };
 
+/**
+ * Handles Microsoft OAuth callback and processes authentication.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const redirect = async (req, res, next) => {
   try {
     const token = await cca.acquireTokenByCode({
@@ -42,8 +52,10 @@ const redirect = async (req, res, next) => {
     };
     userExists(me.data.id, me.data.userPrincipalName, me.data.displayName);
 
+    logger.info("User authenticated successfully");
     res.redirect(req.query.state || "/");
   } catch (e) {
+    logger.error("Authentication failed:", e);
     next(e);
   }
 };

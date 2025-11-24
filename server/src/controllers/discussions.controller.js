@@ -1,5 +1,7 @@
 import db from "../config/db.js";
+import logger from "../utility/logger.js";
 
+/** Retrieves scheduled discussions for today */
 const getScheduledDiscusion = async (req, res) => {
   try {
     const [discussions] = await db.query(
@@ -9,13 +11,19 @@ const getScheduledDiscusion = async (req, res) => {
       return res
         .status(404)
         .json({ error: "No scheduled discussions available!" });
+    logger.info("Scheduled discussions fetched successfully");
     res.status(200).json(discussions);
   } catch (error) {
-    console.error("Error getting scheduled discussions", error);
+    logger.error("Error getting scheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });
   }
 };
 
+/**
+ * Retrieves unscheduled discussions.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const getUnscheduledDiscussions = async (req, res) => {
   try {
     const [discussions] = await db.query(
@@ -23,13 +31,19 @@ const getUnscheduledDiscussions = async (req, res) => {
     );
     if (discussions.length === 0)
       return res.status(200).json({ error: "No unscheduled discussions!" });
+    logger.info("Unscheduled discussions fetched successfully");
     res.json(discussions);
   } catch (error) {
-    console.error("Error getting scheduled discussions", error);
+    logger.error("Error getting unscheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });
   }
 };
 
+/**
+ * Retrieves a discussion by ID.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const getDiscussionById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -41,31 +55,40 @@ const getDiscussionById = async (req, res) => {
       return res
         .status(404)
         .json({ error: `No discussion with ID ${id} found` });
+    logger.info(`Discussion with ID ${id} fetched successfully`);
     res.json(discussion[0]);
   } catch (error) {
-    console.error("Error getting scheduled discussions", error);
+    logger.error("Error getting discussion by ID", error);
     res.status(500).json({ error: "Database error: Discussions" });
   }
 };
 
+/**
+ * Retrieves all scheduled discussions.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const getAllScheduledDiscussions = async (req, res) => {
-  console.log("test1");
   try {
     const [discussions] = await db.query(
       "SELECT * FROM discussions WHERE active_date >= CURDATE() ORDER BY active_date ASC"
     );
-    console.log(discussions);
+    logger.info("All scheduled discussions fetched successfully");
     res.status(200).json(discussions);
   } catch (error) {
-    console.error("Error getting all scheduled discussions", error);
+    logger.error("Error getting all scheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });
   }
 };
 
+/**
+ * Creates a new discussion.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const postDiscussion = async (req, res) => {
   const { title, content, active } = req.body;
   try {
-    console.log("yes");
     if (active === undefined)
       await db.query("INSERT INTO discussions (title, content) VALUES (?, ?)", [
         title,
@@ -76,9 +99,10 @@ const postDiscussion = async (req, res) => {
         "INSERT INTO discussions (title, content, active_date) VALUES (?, ?, ?)",
         [title, content, active]
       );
+    logger.info("New discussion created successfully");
     res.status(200).json({ message: "New discussion created successfully" });
   } catch (error) {
-    console.error("Error getting scheduled discussions", error);
+    logger.error("Error creating discussion", error);
     res.status(500).json({ error: "Database error: Discussions" });
   }
 };

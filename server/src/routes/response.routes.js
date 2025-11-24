@@ -1,5 +1,6 @@
 import { Router } from "express";
 import responseController from "../controllers/response.controller.js";
+
 const router = Router();
 
 router.get("/", responseController.getResponses);
