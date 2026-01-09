@@ -116,20 +116,26 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-app.use(requireAuth);
-
-// API Routes
+// API Routes (public read access, auth required for mutations)
 app.use("/api/discussions", discussionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/responses", responseRoutes);
 
-// Admin only
-app.get("/", CreateAdminAuth(__dirname), (req, res) => {
-  logger.info("Root route accessed");
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
+// Require auth for all other routes
+app.use(requireAuth);
 
+// Serve static assets (CSS, JS, images, etc.) for both apps
 app.use(express.static(path.join(__dirname, "public")));
+
+// Admin Dashboard - require auth then check admin flag in DB
+const adminAuth = CreateAdminAuth(__dirname);
+app.get(/^\/admin/, requireAuth, adminAuth);
+
+// User App - served at root
+app.get(/.*/, (req, res) => {
+  logger.info("User app route accessed");
+  res.sendFile(path.join(__dirname, "public/client/index.html"));
+});
 
 // Centralized error handling
 app.use((err, req, res, next) => {

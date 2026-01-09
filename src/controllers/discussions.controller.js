@@ -12,7 +12,13 @@ const getScheduledDiscusion = async (req, res) => {
         .status(404)
         .json({ error: "No scheduled discussions available!" });
     logger.info("Scheduled discussions fetched successfully");
-    res.status(200).json(discussions);
+    const normalized = discussions.map((d) => ({
+      id: d.discussion_id ?? d.id ?? null,
+      title: d.title,
+      content: d.content,
+      activeDate: d.active_date ?? d.activeDate ?? null,
+    }));
+    res.status(200).json(normalized);
   } catch (error) {
     logger.error("Error getting scheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });
@@ -32,7 +38,13 @@ const getUnscheduledDiscussions = async (req, res) => {
     if (discussions.length === 0)
       return res.status(200).json({ error: "No unscheduled discussions!" });
     logger.info("Unscheduled discussions fetched successfully");
-    res.json(discussions);
+    const normalized = discussions.map((d) => ({
+      id: d.discussion_id ?? d.id ?? null,
+      title: d.title,
+      content: d.content,
+      activeDate: d.active_date ?? d.activeDate ?? null,
+    }));
+    res.json(normalized);
   } catch (error) {
     logger.error("Error getting unscheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });
@@ -56,7 +68,13 @@ const getDiscussionById = async (req, res) => {
         .status(404)
         .json({ error: `No discussion with ID ${id} found` });
     logger.info(`Discussion with ID ${id} fetched successfully`);
-    res.json(discussion[0]);
+    const d = discussion[0];
+    res.json({
+      id: d.discussion_id ?? d.id ?? null,
+      title: d.title,
+      content: d.content,
+      activeDate: d.active_date ?? d.activeDate ?? null,
+    });
   } catch (error) {
     logger.error("Error getting discussion by ID", error);
     res.status(500).json({ error: "Database error: Discussions" });
@@ -74,7 +92,13 @@ const getAllScheduledDiscussions = async (req, res) => {
       "SELECT * FROM discussions WHERE active_date >= CURDATE() ORDER BY active_date ASC"
     );
     logger.info("All scheduled discussions fetched successfully");
-    res.status(200).json(discussions);
+    const normalized = discussions.map((d) => ({
+      id: d.discussion_id ?? d.id ?? null,
+      title: d.title,
+      content: d.content,
+      activeDate: d.active_date ?? d.activeDate ?? null,
+    }));
+    res.status(200).json(normalized);
   } catch (error) {
     logger.error("Error getting all scheduled discussions", error);
     res.status(500).json({ error: "Database error: Discussions" });

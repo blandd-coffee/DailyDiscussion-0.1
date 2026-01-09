@@ -4,6 +4,7 @@ import responseController from "../controllers/response.controller.js";
 const router = Router();
 
 router.get("/", responseController.getResponses);
+router.get("/discussion/:id", responseController.getReplies);
 router.get("/user/:id", responseController.getResponsesByUser);
 router.get("/replies", responseController.getReplies);
 router.get("/all/:id", responseController.getAllResponsesByUser);

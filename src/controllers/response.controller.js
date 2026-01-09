@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import logger from "../utility/logger.js";
 
 /** Retrieves responses for today's scheduled discussion */
 const getResponses = async (req, res) => {
@@ -17,15 +18,34 @@ const getResponses = async (req, res) => {
     );
     if (responses.length === 0)
       return res.status(404).json({ error: "No responses found" });
+
+    // Normalize DB rows to client-friendly shape
+    const normalized = responses.map((r) => ({
+      id: r.response_id ?? r.id ?? null,
+      content: r.content,
+      createdAt: r.created_at ?? r.createdAt ?? null,
+      author: r.author || r.name || r.username || null,
+      author_id: r.author_id ?? r.authorId ?? null,
+      parent_id:
+        r.parent_response_id ?? r.parent_response ?? r.parent_id ?? null,
+      discussion_id: r.discussion_id ?? r.discussionId ?? null,
+    }));
+
     logger.info("Responses fetched successfully");
-    res.json(responses);
+    res.json(normalized);
   } catch (error) {
     logger.error("Error fetching responses", error);
     res.status(500).json({ error: "Database error" });
   }
 };
 const getReplies = async (req, res) => {
-  const { discussion_id } = req.body;
+  // Support both route parameter and body parameter for flexibility
+  const discussion_id = req.params.id || req.body.discussion_id;
+
+  if (!discussion_id) {
+    return res.status(400).json({ error: "Missing discussion_id" });
+  }
+
   try {
     const [replies] = await db.query(
       "SELECT * FROM responses WHERE discussion_id = ?",
@@ -33,7 +53,19 @@ const getReplies = async (req, res) => {
     );
     if (replies.length === 0)
       return res.status(404).json({ error: "No replies found" });
-    res.json(replies);
+
+    const normalized = replies.map((r) => ({
+      id: r.response_id ?? r.id ?? null,
+      content: r.content,
+      createdAt: r.created_at ?? r.createdAt ?? null,
+      author: r.author || r.name || r.username || null,
+      author_id: r.author_id ?? r.authorId ?? null,
+      parent_id:
+        r.parent_response_id ?? r.parent_response ?? r.parent_id ?? null,
+      discussion_id: r.discussion_id ?? r.discussionId ?? null,
+    }));
+
+    res.json(normalized);
   } catch (error) {
     console.error("Error fetching responses", error);
     res.status(500).json({ error: "Database error" });
@@ -50,7 +82,19 @@ const getResponsesByUser = async (req, res) => {
       return res
         .status(404)
         .json({ error: `No responses from user ${user_id}` });
-    res.json(responses);
+
+    const normalized = responses.map((r) => ({
+      id: r.response_id ?? r.id ?? null,
+      content: r.content,
+      createdAt: r.created_at ?? r.createdAt ?? null,
+      author: r.author || r.name || r.username || null,
+      author_id: r.author_id ?? r.authorId ?? null,
+      parent_id:
+        r.parent_response_id ?? r.parent_response ?? r.parent_id ?? null,
+      discussion_id: r.discussion_id ?? r.discussionId ?? null,
+    }));
+
+    res.json(normalized);
   } catch (error) {
     console.error("Error fetching responses", error);
     res.status(500).json({ error: "Database error" });
@@ -67,7 +111,19 @@ const getAllResponsesByUser = async (req, res) => {
       return res
         .status(404)
         .json({ error: `No responses from user ${user_id}` });
-    res.json(responses);
+
+    const normalized = responses.map((r) => ({
+      id: r.response_id ?? r.id ?? null,
+      content: r.content,
+      createdAt: r.created_at ?? r.createdAt ?? null,
+      author: r.author || r.name || r.username || null,
+      author_id: r.author_id ?? r.authorId ?? null,
+      parent_id:
+        r.parent_response_id ?? r.parent_response ?? r.parent_id ?? null,
+      discussion_id: r.discussion_id ?? r.discussionId ?? null,
+    }));
+
+    res.json(normalized);
   } catch (error) {
     console.error("Error fetching responses", error);
     res.status(500).json({ error: "Database error" });

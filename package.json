@@ -1,7 +1,27 @@
 {
+  "name": "daily-discussion",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Daily Discussion - Daily topic discussion and responses platform",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "node app.js",
+    "dev:client": "vite --config vite.config.js",
+    "dev:admin": "vite --config vite.admin.config.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "build:client": "vite build --config vite.config.js",
+    "build:admin": "vite build --config vite.admin.config.js",
+    "build": "concurrently \"npm run build:client\" \"npm run build:admin\"",
+    "preview:client": "vite preview --config vite.config.js",
+    "preview:admin": "vite preview --config vite.admin.config.js"
+  },
   "dependencies": {
     "@azure/msal-node": "^3.8.1",
     "axios": "^1.13.2",
+    "bootstrap": "^5.3.8",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -12,19 +32,14 @@
     "joi": "^17.12.0",
     "mysql2": "^3.15.3",
     "nodemon": "^3.1.11",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "winston": "^3.11.0"
   },
-  "type": "module",
-  "name": "server",
-  "version": "1.0.0",
-  "description": "| Method | Endpoint                   | Description                         |\r | ------ | -------------------------- | ----------------------------------- |\r | GET    | `/auth/login`              | Initiate Microsoft login            |\r | GET    | `/auth/microsoft/callback` | Microsoft OAuth callback handler    |\r | GET    | `/auth/me`                 | Get current authenticated user info |\r | POST   | `/auth/logout`             | Logout current user                 |",
-  "main": "app.js",
-  "directories": {
-    "test": "tests"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "dev": "nodemon app.js"
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.2.1",
+    "vite": "^5.0.8"
   },
   "keywords": [],
   "author": "",

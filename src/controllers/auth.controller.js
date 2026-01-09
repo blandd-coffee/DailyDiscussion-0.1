@@ -4,12 +4,26 @@ import axios from "axios";
 import { userExists } from "../utility/userExists.js";
 import logger from "../utility/logger.js";
 
-const cca = new ConfidentialClientApplication(msalConfig);
+let cca = null;
+
+// Initialize CCA only if Azure credentials are provided
+const initializeCCA = () => {
+  if (!cca && msalConfig.auth.clientSecret) {
+    cca = new ConfidentialClientApplication(msalConfig);
+  }
+  return cca;
+};
 
 /** Handles Microsoft OAuth login flow redirection */
 const login = async (req, res, next) => {
   try {
-    const url = await cca.getAuthCodeUrl({
+    const ccaInstance = initializeCCA();
+    if (!ccaInstance) {
+      return res
+        .status(501)
+        .json({ error: "Azure authentication not configured" });
+    }
+    const url = await ccaInstance.getAuthCodeUrl({
       redirectUri: authParams.redirectUri,
       scopes: authParams.scopes,
       prompt: "select_account",
@@ -30,7 +44,13 @@ const login = async (req, res, next) => {
  */
 const redirect = async (req, res, next) => {
   try {
-    const token = await cca.acquireTokenByCode({
+    const ccaInstance = initializeCCA();
+    if (!ccaInstance) {
+      return res
+        .status(501)
+        .json({ error: "Azure authentication not configured" });
+    }
+    const token = await ccaInstance.acquireTokenByCode({
       redirectUri: authParams.redirectUri,
       code: req.query.code,
       scopes: authParams.scopes,
@@ -38,7 +58,7 @@ const redirect = async (req, res, next) => {
 
     // persist minimal identity + token cache
     req.session.account = token.account;
-    req.session.tokenCache = cca.getTokenCache().serialize();
+    req.session.tokenCache = ccaInstance.getTokenCache().serialize();
 
     // optional: fetch profile once and cache
     const { accessToken } = token;
@@ -65,17 +85,24 @@ const me = async (req, res, next) => {
     if (!req.session.account)
       return res.status(401).json({ error: "not_authenticated" });
 
+    const ccaInstance = initializeCCA();
+    if (!ccaInstance) {
+      return res
+        .status(501)
+        .json({ error: "Azure authentication not configured" });
+    }
+
     // rehydrate cache so msal can refresh silently
     if (req.session.tokenCache)
-      cca.getTokenCache().deserialize(req.session.tokenCache);
+      ccaInstance.getTokenCache().deserialize(req.session.tokenCache);
 
-    const silent = await cca.acquireTokenSilent({
+    const silent = await ccaInstance.acquireTokenSilent({
       account: req.session.account,
       scopes: ["User.Read"],
     });
 
     // keep cache fresh in session
-    req.session.tokenCache = cca.getTokenCache().serialize();
+    req.session.tokenCache = ccaInstance.getTokenCache().serialize();
     userExists(req.session.userPrincipalName, req.session.displayName);
 
     res.json({
